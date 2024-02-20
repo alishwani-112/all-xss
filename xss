@@ -1,0 +1,170 @@
+reflected
+	what is 
+		run js code in reflected parameter value can error message, search result, or any other response that includes some or all of the input sent to the server as part of the request
+	where to see
+		in any reflected value 
+			error 
+			search 
+			api
+	how to test 
+		0-after done allrecon you will have all reflected value 
+		1-see where the value is reflected  
+			HTML elements
+			JSON elements
+			HTML attributes
+			XML elements and attributes
+			Plain text within HTML or XML responses
+		2-see the security :
+			see in cookie browser
+				see if the important cookie like session id have one of security cookie
+					-cookie flag
+						httponly
+							dont use this cookie in client side js
+						secure
+							seen this cookie only in https
+						 same site 
+							can send this cookie by cors req
+			-browser security header
+				see if have in response
+					x-xss-protactions
+						X-XSS-Protection: 0
+							xss filter not work
+						X-XSS-Protection: 1; mode=block
+
+							xss filter work and block the user that send xss pyload
+						X-XSS-Protection: 1
+							work xss filter 
+			-contant security policy
+				csp of the req 
+					see if have csp 
+					see wich is allow and what allow 
+					try eval and inline to bypass
+					https://csp-evaluator.withgoogle.com/
+			see if have web application firewall if have waf see what 
+				blocked 
+				not block  
+			-clint side validate
+				-is have any limit in client side 
+					must be number ,email,short,long 
+			server side validate
+				is the server replace or delete,add any value or encode specail caractect
+			-output encode
+				-wich encoded type 
+					    HTML Entity Encoding: This involves converting characters to their corresponding HTML entities. For example, < becomes &lt; and > becomes &gt;. This ensures that the browser interprets the characters as text rather than HTML tags.
+					    Attribute Encoding: When inserting dynamic content into HTML attributes (e.g., href, src, alt), it's important to encode special characters and quotes to prevent attribute injection attacks. For example, " becomes &quot;.
+					    JavaScript Encoding: When inserting dynamic content into JavaScript code, characters such as single quotes ('), double quotes ("), and backslashes (\) should be escaped to prevent script injection attacks. For example, ' becomes \' and " becomes \".
+					    URL Encoding: When generating URLs dynamically, special characters should be encoded to prevent URL manipulation attacks. For example, spaces become %20 and slashes become %2F.
+		set pyload by the all aprove data
+	tools 
+		dalfox 
+		Gxss
+		kxss
+	auto 
+		xsser
+		xsstrik
+		all uniq url 
+			cat all | uro | qsreplace FUZZ | grep judge.me | gf xss >as
+				cat as paramspider out |uniq >allparam
+					cat allparam | kxss
+						dalfox
+
+	extra 
+		1-encoded cases
+			url
+                Server does not encode or decode, None-encoded input
+                    User Input: <script>alert()</script>
+                    Browser Sends: %3Cscript%3Ealert%28%29%3C%2Fscript%3E
+                    Server Receives: <script>alert()</script>
+                    Server Processes: No encoding or decoding
+                    Output to Browser: <script>alert()</script>
+                    Browser Displays: <script>alert()</script>
+                    Bug: The server directly outputs the user-provided string without encoding it, allowing for a reflected XSS attack.
+                Server does not encode or decode, Encoded input
+                    User Input: %3Cscript%3Ealert%28%29%3C%2Fscript%3E
+                    Browser Sends: %253Cscript%253Ealert%2528%2529%253C%252Fscript%253E
+                    Server Receives: %3Cscript%3Ealert%28%29%3C%2Fscript%3E
+                    Server Processes: No encoding or decoding
+                    Output to Browser: %3Cscript%3Ealert%28%29%3C%2Fscript%3E
+                    Browser Displays: <script>alert()</script>
+                    Bug: The server directly outputs the user-provided string without decoding it, allowing for a reflected XSS attack.
+                Server auto-encodes and decodes, None-encoded input
+                    User Input: <script>alert()</script>
+                    Browser Sends: %3Cscript%3Ealert%28%29%3C%2Fscript%3E
+                    Server Receives: %3Cscript%3Ealert%28%29%3C%2Fscript%3E
+                    Server Processes: No encoding or decoding
+                    Output to Browser: %3Cscript%3Ealert%28%29%3C%2Fscript%3E
+                    Browser Displays: <script>alert()</script>
+                    Bug: None. The server handles the input safely without decoding it, and the browser correctly displays the content as HTML, which will render the JavaScript code as a pop-up alert.
+                Server auto-encodes and decodes, Encoded input
+                    User Input: %3Cscript%3Ealert%28%29%3C%2Fscript%3E
+                    Browser Sends: %253Cscript%253Ealert%2528%2529%253C%252Fscript%253E
+                    Server Receives: %3Cscript%3Ealert%28%29%3C%2Fscript%3E
+                    Server Processes: No encoding or decoding
+                    Output to Browser: %3Cscript%3Ealert%28%29%3C%2Fscript%3E
+                    Browser Displays: <script>alert()</script>
+                    Bug: None. The server handles the input safely without decoding it, and the browser correctly displays the content as HTML, which will render the JavaScript code as a pop-up alert.
+                Server auto-encodes and decodes, Double-encoded input
+                    User Input: %253Cscript%253Ealert%2528%2529%253C%252Fscript%253E
+                    Browser Sends: %25253Cscript%25253Ealert%252528%252529%25253C%25252Fscript%25253E
+                    Server Receives: %253Cscript%253Ealert%2528%2529%253C%252Fscript%253E
+                    Server Processes: No encoding or decoding
+                    Output to Browser: %253Cscript%253Ealert%2528%2529%253C%252Fscript%253E
+                    Browser Displays: %3Cscript%3Ealert%28%29%3C%2Fscript%3E
+                    Bug: None. The server handles the input safely without decoding it, and the browser correctly displays the content as HTML, which will render the JavaScript code as a pop-up alert.
+                Server does not encode but decodes, Double-encoded input
+                    User Input: %253Cscript%253Ealert%2528%2529%253C%252Fscript%253E
+                    Browser Sends: %25253Cscript%25253Ealert%252528%252529%25253C%25252Fscript%25253E
+                    Server Receives: %253Cscript%253Ealert%2528%2529%253C%252Fscript%253E
+                    Server Processes: No encoding or decoding
+                    Output to Browser: %253Cscript%253Ealert%2528%2529%253C%252Fscript%253E
+                    Browser Displays: %3Cscript%3Ealert%28%29%3C%2Fscript%3E
+                    Bug: None. The server handles the input safely without decoding it, and the browser correctly displays the content as HTML, which will render the JavaScript code as a pop-up alert.
+			html encode 
+				Input none HTML encoded, Server uses HTML encoding
+					User Input: <script>alert()</script>
+					Browser Sends: %3Cscript%3Ealert()%3C%2Fscript%3E
+					Server Receives: &lt;script&gt;alert()&lt;/script&gt;
+					Server Processes: HTML encodes the input
+					Output to Browser: &lt;script&gt;alert()&lt;/script&gt;
+					Browser Displays: <script>alert()</script>
+					Bug: None. The server HTML encodes the input, rendering it harmless, and the browser displays the encoded HTML, which will not execute as JavaScript.
+				Input none HTML encoded, Server does not use HTML encoding
+					User Input: <script>alert()</script>
+					Browser Sends: %3Cscript%3Ealert()%3C%2Fscript%3E
+					Server Receives: <script>alert()</script>
+					Server Processes: No encoding or decoding
+					Output to Browser: <script>alert()</script>
+					Browser Displays: <script>alert()</script>
+					Bug: The server directly outputs the user-provided string without encoding it, allowing for a reflected XSS attack.
+				Input HTML encoded, Server uses HTML encoding
+					User Input: %3Cscript%3Ealert()%3C%2Fscript%3E
+					Browser Sends: %253Cscript%253Ealert()%253C%252Fscript%253E
+					Server Receives: &lt;script&gt;alert()&lt;/script&gt;
+					Server Processes: HTML encodes the input
+					Output to Browser: &lt;script&gt;alert()&lt;/script&gt;
+					Browser Displays: <script>alert()</script>
+					Bug: None. The server HTML encodes the input, rendering it harmless, and the browser displays the encoded HTML, which will not execute as JavaScript.
+				Input HTML encoded, Server does not use HTML encoding
+					User Input: %3Cscript%3Ealert()%3C%2Fscript%3E
+					Browser Sends: %253Cscript%253Ealert()%253C%252Fscript%253E
+					Server Receives: <script>alert()</script>
+					Server Processes: No encoding or decoding
+					Output to Browser: <script>alert()</script>
+					Browser Displays: <script>alert()</script>
+					Bug: The server directly outputs the user-provided string without decoding it, allowing for a reflected XSS attack.
+				Input Double HTML encoded, Server uses HTML encoding
+					User Input: %253Cscript%253Ealert()%253C%252Fscript%253E
+					Browser Sends: %2525253Cscript%2525253Ealert%25252528%25252529%2525253C%2525252Fscript%2525253E
+					Server Receives: &lt;script&gt;alert()&lt;/script&gt;
+					Server Processes: HTML encodes the input
+					Output to Browser: &lt;script&gt;alert()&lt;/script&gt;
+					Browser Displays: <script>alert()</script>
+					Bug: None. The server HTML encodes the input, rendering it harmless, and the browser displays the encoded HTML, which will not execute as JavaScript.
+				Input Double HTML encoded, Server does not use HTML encoding
+					User Input: %253Cscript%253Ealert()%253C%252Fscript%253E
+					Browser Sends: %2525253Cscript%2525253Ealert%25252528%25252529%2525253C%2525252Fscript%2525253E
+					Server Receives: <script>alert()</script>
+					Server Processes: No encoding or decoding
+					Output to Browser: <script>alert()</script>
+					Browser Displays: <script>alert()</script>
+					Bug: The server directly outputs the user-provided string without decoding it, allowing for a reflected XSS attack.
